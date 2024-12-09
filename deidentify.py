@@ -109,7 +109,7 @@ if __name__ == "__main__":
         ],
         required=False,
         nargs="+",
-        default=["basicProfile"],
+        default=None,
         help="Which DICOM deidentification profile(s) to apply. (default None)",
     )
 
