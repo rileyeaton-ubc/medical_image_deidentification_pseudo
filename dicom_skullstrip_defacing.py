@@ -63,7 +63,14 @@ class Inference:
     
     @staticmethod
     def _deidentify_header(nii_image, keys: list = ["descrip", "intent_name"]) -> nib.Nifti1Image:
-        
+        """
+        De-identify the header of a NIfTI image by clearing specified metadata fields.
+        Parameters:
+        nii_image (nib.Nifti1Image): The NIfTI image whose header is to be de-identified.
+        keys (list): A list of header keys to be cleared. Default is ["descrip", "intent_name"].
+        Returns:
+        nib.Nifti1Image: The NIfTI image with the specified header fields cleared.
+        """
         for key in keys:
             if key in nii_image.header:
                 nii_image.header[key] = b""
