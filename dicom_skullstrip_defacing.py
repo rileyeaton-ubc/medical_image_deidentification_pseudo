@@ -60,7 +60,15 @@ class Inference:
         """
         self.input_path = input_path
         self.run()
-
+    
+    @staticmethod
+    def _deidentify_header(nii_image, keys: list = ["descrip", "intent_name"]) -> nib.Nifti1Image:
+        
+        for key in keys:
+            if key in nii_image.header:
+                nii_image.header[key] = b""
+        return nii_image
+        
     def run(self) -> None:
         """
         Runs the inference process on the input data and saves the output data.
@@ -126,7 +134,10 @@ class Inference:
                 if pred_numpy.ndim == 2:
                     pred_numpy = pred_numpy[None, ...]
                 pred = nifti_img_data * (np.transpose(pred_numpy > 0.5, (1, 2, 0)))
-                img = nib.Nifti1Image(pred, nifti_img.affine)
+                
+                img = nib.Nifti1Image(pred, affine=nifti_img.affine, header=nifti_img.header)
+                img = self._deidentify_header(img)
+                
                 if data["file_name"][idx].endswith('.nii') or data["file_name"][idx].endswith('.nii.gz'):
                     nib.save(img,
                              f"{self.output_path}/{Path(Path(data['file_name'][idx]).stem).stem}_{self.stem}.nii.gz")
