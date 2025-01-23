@@ -29,7 +29,7 @@ def resample(nifti_img: nib.Nifti1Image) -> nib.Nifti1Image:
 
     """
     orig_orientation = nib.orientations.io_orientation(nifti_img.affine)
-    target_orientation = nib.orientations.axcodes2ornt(('R', 'A', 'S'))
+    target_orientation = nib.orientations.axcodes2ornt(("R", "A", "S"))
 
     transform = nib.orientations.ornt_transform(orig_orientation, target_orientation)
 
@@ -94,10 +94,29 @@ def create_affine(sorted_dicoms: list) -> np.matrix:
     else:
         step = (image_pos - last_image_pos) / (1 - len(sorted_dicoms))
 
-    affine = np.matrix([[-image_orient1[0] * delta_c, -image_orient2[0] * delta_r, -step[0], -image_pos[0]],
-                        [-image_orient1[1] * delta_c, -image_orient2[1] * delta_r, -step[1], -image_pos[1]],
-                        [image_orient1[2] * delta_c, image_orient2[2] * delta_r, step[2], image_pos[2]],
-                        [0, 0, 0, 1]])
+    affine = np.matrix(
+        [
+            [
+                -image_orient1[0] * delta_c,
+                -image_orient2[0] * delta_r,
+                -step[0],
+                -image_pos[0],
+            ],
+            [
+                -image_orient1[1] * delta_c,
+                -image_orient2[1] * delta_r,
+                -step[1],
+                -image_pos[1],
+            ],
+            [
+                image_orient1[2] * delta_c,
+                image_orient2[2] * delta_r,
+                step[2],
+                image_pos[2],
+            ],
+            [0, 0, 0, 1],
+        ]
+    )
 
     return affine
 
@@ -116,7 +135,10 @@ def dcm2nifti(dir_path: str, transpose: bool = False) -> nib.Nifti1Image:
 
     if os.path.isdir(dir_path):
         # sort files by instance number
-        files = sorted(glob(os.path.join(dir_path, '**', '*.dcm'), recursive=True), key=order_slices)
+        files = sorted(
+            glob(os.path.join(dir_path, "**", "*.dcm"), recursive=True),
+            key=order_slices,
+        )
     else:
         files = [dir_path]
 
@@ -149,7 +171,9 @@ def nifti2dcm(nifti_file: nib.Nifti1Image, dcm_dir: str, out_dir: str) -> None:
     """
 
     if os.path.isdir(dcm_dir):
-        files = sorted(glob(os.path.join(dcm_dir, '**', '*.dcm'), recursive=True), key=order_slices)
+        files = sorted(
+            glob(os.path.join(dcm_dir, "**", "*.dcm"), recursive=True), key=order_slices
+        )
     else:
         files = [dcm_dir]
     target_affine = create_affine(files)
@@ -168,11 +192,9 @@ def nifti2dcm(nifti_file: nib.Nifti1Image, dcm_dir: str, out_dir: str) -> None:
 
     for slice_ in range(number_slices):
         dcm = pydicom.dcmread(files[slice_], stop_before_pixels=False)
-        dcm.PixelData = (
-            (nifti_array[slice_, ...]).astype(np.uint16).tobytes()
-        )
+        dcm.PixelData = (nifti_array[slice_, ...]).astype(np.uint16).tobytes()
         pydicom.dcmwrite(
-            filename=os.path.join(out_dir, f'slice{slice_}.dcm'),
+            filename=os.path.join(out_dir, f"slice{slice_}.dcm"),
             dataset=dcm,
         )
 
@@ -227,8 +249,12 @@ class SegmentationDataset(Dataset):
         mask = resample(nib.load(self.path_list["mask_path"][idx]))
 
         subject = tio.Subject(
-            image=tio.ScalarImage(tensor=image.get_fdata()[None, ...].copy(), affine=image.affine),
-            mask=tio.LabelMap(tensor=mask.get_fdata()[None, ...].copy(), affine=mask.affine),
+            image=tio.ScalarImage(
+                tensor=image.get_fdata()[None, ...].copy(), affine=image.affine
+            ),
+            mask=tio.LabelMap(
+                tensor=mask.get_fdata()[None, ...].copy(), affine=mask.affine
+            ),
         )
 
         if self.train:
@@ -254,8 +280,12 @@ class SegmentationDataset(Dataset):
             "mask": subject["mask"].data,
         }
 
-        data_dict["image"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(data_dict['image'])
-        data_dict["mask"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(data_dict['mask'])
+        data_dict["image"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(
+            data_dict["image"]
+        )
+        data_dict["mask"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(
+            data_dict["mask"]
+        )
 
         data_dict["image"] = v2.Lambda(lambda x: self._normalize(x))(data_dict["image"])
 
@@ -325,16 +355,18 @@ class InferenceDataset(SegmentationDataset):
             "file_name": file_path,
         }
 
-        data_dict["image"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(data_dict['image'])
+        data_dict["image"] = v2.Lambda(lambda x: self.up(x.unsqueeze(0)).squeeze(0))(
+            data_dict["image"]
+        )
         data_dict["image"] = v2.Lambda(lambda x: self._normalize(x))(data_dict["image"])
 
         return data_dict
 
 
 def get_loaders(
-        train_paths: dict | None = None,
-        val_paths: dict | None = None,
-        batch_size: int = 16,
+    train_paths: dict | None = None,
+    val_paths: dict | None = None,
+    batch_size: int = 16,
 ) -> tuple[DataLoader, DataLoader]:
     """
     Returns the data loaders for training and validation datasets.
@@ -363,8 +395,8 @@ def get_loaders(
 
 
 def get_inference_loader(
-        data_path: str,
-        batch_size: int = 16,
+    data_path: str,
+    batch_size: int = 16,
 ) -> DataLoader:
     """
     Create a data loader for inference.
@@ -385,7 +417,11 @@ def get_inference_loader(
     }
 
     potential_paths = {
-        "image_path": glob(os.path.join(data_path, "*"), recursive=True),
+        "image_path": (
+            glob(os.path.join(data_path, "*"), recursive=True)
+            if os.path.isdir(data_path)
+            else [data_path]
+        )
     }
 
     valid_paths = {"image_path": []}
@@ -394,7 +430,7 @@ def get_inference_loader(
         file = file.lower()
         if file.endswith(".nii") or file.endswith(".nii.gz"):
             valid_paths["image_path"].append(file)
-        elif file.endswith('.dcm'):
+        elif file.endswith(".dcm"):
             valid_paths["image_path"].append(file)
         elif os.path.isdir(file):
             valid_paths["image_path"].append(file)
@@ -403,7 +439,9 @@ def get_inference_loader(
                 pydicom.dcmread(file, stop_before_pixels=True)
                 valid_paths["image_path"].append(file)
             except Exception:
-                logging.warning(f"Wrong file format: {file}\nAccepted file formats are .nii, .nii.gz and .dcm")
+                logging.warning(
+                    f"Wrong file format: {file}\nAccepted file formats are .nii, .nii.gz and .dcm"
+                )
 
     inference_dataset = InferenceDataset(valid_paths)
     inference_loader = DataLoader(inference_dataset, **dataloader_params)
