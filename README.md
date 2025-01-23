@@ -36,7 +36,7 @@ You can install the anonymization tool either directly via git, by cloning this 
 
 1. Clone repository:
    
-       git clone ...
+       git clone https://github.com/TIO-IKIM/medical_image_deidentification.git
 
 2. Create a conda environment with Python version 3.12.4 and install the necessary dependencies:
    
