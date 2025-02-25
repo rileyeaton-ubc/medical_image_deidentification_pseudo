@@ -69,7 +69,7 @@ For the installation and execution of the docker image, you must have [Docker](h
        python3 deidentify.py [your flags]
 
 ## Usage
-**Twix Anonymization CLI**
+**De-Identification CLI**
 ```
 usage: deidentify.py [-h] [-v | --verbose | --no-verbose] [-t | --text-removal | --no-text-removal] [-i INPUT]
                                     [-o OUTPUT] [--gpu GPU] [-s | --skull_strip | --no-skull_strip] [-de | --deface | --no-deface]
