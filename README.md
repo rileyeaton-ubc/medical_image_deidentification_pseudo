@@ -1,4 +1,4 @@
-# Pseudonymization Fork
+# Pseudonymization Fork Details
 
 This fork builds on the work presented in [_De-Identification of Medical Imaging Data: A Comprehensive Tool for Ensuring Patient Privacy_](https://arxiv.org/abs/2410.12402).
 
