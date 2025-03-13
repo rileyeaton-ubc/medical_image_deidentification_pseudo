@@ -1,13 +1,59 @@
+# Pseudonymization Fork Details
+
+This fork builds on the work presented in [_De-Identification of Medical Imaging Data: A Comprehensive Tool for Ensuring Patient Privacy_](https://arxiv.org/abs/2410.12402).
+
+Namely, changing the codebase functionality in the following ways:
+
+- **Introduces a new operator—`PSEUDO`—to the DICOM metadata tag anonymization capabilities (profiles).**
+
+  - This operator allows some types of DICOM tags to have their values replaced with pseudonymized (faked) data.
+  - Multiple pseudonymization **classes** are available for use in different scenarios, such as:
+    - `GIVEN_NAME`
+    - `SURNAME`
+    - `FULL_NAME`
+    - `LOCATION_CA`
+    - `LOCATION_BC`
+    - `DATE`
+    - `TIME`
+    - `DATETIME`
+    - `ID_NUMERICAL`
+    - `ID_ALPHANUMERICAL`
+    - `UID`
+    - `HEALTH_INSTITUTION_CA`
+  - Usage syntax: `PSEUDO [tagName] [PSEUDO_CLASS]`
+  - Example usage:
+    ```
+    FORMAT dicom
+    %header
+    PSEUDO ClinicalTrialSiteID ID_NUMERICAL
+    PSEUDO ClinicalTrialSiteName HEALTH_INSTITUTION
+    PSEUDO ConsultingPhysicianName FULL_NAME
+    PSEUDO StudyDate DATE
+    ```
+  - Further documentation available in [`dicom_deid/deid_options/documentation.md`](dicom_deid/deid_options/documentation.md).
+
+- **Add DICOM anonymization profile reviewer, which introduces logic to check if a new profile contradicts the master profile.**
+  - Ensures no operations are attempted that do not comply with the DICOM standard.
+- **Changes the Optical Character Recognition (OCR) algorithm from _Tesseract_ to the much more modern Visual Document Understanding (VDU) model, [_Donut_](https://arxiv.org/abs/2111.15664).**
+  - Will lead to a higher accuracy in detecting (and therefore removing) baked-in text within DICOM images.
+  - Provides an understanding of the context for detected text, which _may_ allow the model to only remove _specific_ text that is sensitive.
+- **Disable all features that do not involve files in DICOM format.**
+  - Allows the pipeline to better integrate into clinical environments, which solely use DICOM files in practice.
+  - Reduces overhead when dealing with thousands of files.
+
+[The original repository](https://github.com/TIO-IKIM/medical_image_deidentification) details (`README`) are available below.
+
+---
+
 # De-Identification of Medical Imaging Data: A Comprehensive Tool for Ensuring Patient Privacy
 
-[![Python 3.11.2](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/release/python-3120/) 
+[![Python 3.11.2](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/release/python-3120/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 ![Open Source Love][0c]
 [![Docker](https://img.shields.io/badge/-Docker-46a2f1?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/morrempe/hold)
 
 [0c]: https://badges.frapsoft.com/os/v2/open-source.svg?v=103
-
 
 <div align="center">
 
@@ -23,53 +69,55 @@ This repository contains the **De-Identification of Medical Imaging Data: A Comp
 
 </div>
 
-
 This tool combines multiple anonymization steps, including metadata deidentification, defacing and skull-stripping while being faster than current state-of-the-art deidentification tools.
 
 ![Computationtimes](Figures/computation_times.png)
 
 ## Getting started
 
-You can install the anonymization tool either directly via git, by cloning this repository or via Docker. 
+You can install the anonymization tool either directly via git, by cloning this repository or via Docker.
 
 ### Installation via Git
 
 1. Clone repository:
-   
-       git clone https://github.com/TIO-IKIM/medical_image_deidentification.git
+
+   git clone https://github.com/TIO-IKIM/medical_image_deidentification.git
 
 2. Create a conda environment with Python version 3.12.4 and install the necessary dependencies:
-   
-       conda create -n my_env python=3.12.4 --file requirements.txt
-    In case of installation issues with conda, use pip install -r requirements.txt to install the dependecies.
+
+   conda create -n my_env python=3.12.4 --file requirements.txt
+   In case of installation issues with conda, use pip install -r requirements.txt to install the dependecies.
 
 3. Activate your new environment:
 
-       conda activate my_env
+   conda activate my_env
 
 4. Run the script with the corresponding cli parameter, e.g.:
 
-       python3 deidentify.py [your flags]
+   python3 deidentify.py [your flags]
 
 ### Installation via Docker
+
 Alternatively this tool is distributed via docker. You can find the docker images [here](https://hub.docker.com/r/morrempe/hold). The docker image is available for amd64 and arm64 platforms.
 
 For the installation and execution of the docker image, you must have [Docker](https://docs.docker.com/get-docker/) installed on your system.
 
 1. Pull the docker image
 
-       docker pull morrempe/hold:[tag]   (either arm64 or amd64)
+   docker pull morrempe/hold:[tag] (either arm64 or amd64)
 
-2. Run the docker container with attached volume. Your data will be mounted in the ````data```` folder:
+2. Run the docker container with attached volume. Your data will be mounted in the `data` folder:
 
-       docker run --rm -it -v [Path/to/your/data]:/data morrempe/hold:[tag]
+   docker run --rm -it -v [Path/to/your/data]:/data morrempe/hold:[tag]
 
 3. Run the script with the corresponding cli parameter, e.g.:
 
-       python3 deidentify.py [your flags]
+   python3 deidentify.py [your flags]
 
 ## Usage
+
 **De-Identification CLI**
+
 ```
 usage: deidentify.py [-h] [-v | --verbose | --no-verbose] [-t | --text-removal | --no-text-removal] [-i INPUT]
                                     [-o OUTPUT] [--gpu GPU] [-s | --skull_strip | --no-skull_strip] [-de | --deface | --no-deface]
@@ -98,15 +146,15 @@ options:
 ## Citation
 
 If you use our tool in your work, please cite us with the following BibTeX entry.
+
 ```latex
 @misc{rempe2024deidentificationmedicalimagingdata,
-      title={De-Identification of Medical Imaging Data: A Comprehensive Tool for Ensuring Patient Privacy}, 
+      title={De-Identification of Medical Imaging Data: A Comprehensive Tool for Ensuring Patient Privacy},
       author={Moritz Rempe and Lukas Heine and Constantin Seibold and Fabian Hörst and Jens Kleesiek},
       year={2024},
       eprint={2410.12402},
       archivePrefix={arXiv},
       primaryClass={eess.IV},
-      url={https://arxiv.org/abs/2410.12402}, 
+      url={https://arxiv.org/abs/2410.12402},
 }
 ```
-
