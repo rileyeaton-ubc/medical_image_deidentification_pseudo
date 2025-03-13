@@ -7,6 +7,7 @@ Namely, changing the codebase functionality in the following ways:
 - **Introduces a new operator—`PSEUDO`—to the DICOM metadata tag anonymization capabilities (profiles).**
 
   - This operator allows some types of DICOM tags to have their values replaced with pseudonymized (faked) data.
+  - This will ensure **no errors** are caused by invalid (blank) header values when the resulting DICOM file is used in real-world medical applications.
   - Multiple pseudonymization **classes** are available for use in different scenarios, such as:
     - `GIVEN_NAME`
     - `SURNAME`
