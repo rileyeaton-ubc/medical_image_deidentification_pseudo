@@ -31,13 +31,16 @@ Namely, changing the codebase functionality in the following ways:
     PSEUDO ConsultingPhysicianName FULL_NAME
     PSEUDO StudyDate DATE
     ```
-  - Further documentation available in [`dicom_deid/deid_options/documentation.md`](dicom_deid/deid_options/documentation.md).
+  - Further documentation is available in [`dicom_deid/deid_options/documentation.md`](dicom_deid/deid_options/documentation.md).
 
 - **Add DICOM anonymization profile reviewer, which introduces logic to check if a new profile contradicts the master profile.**
   - Ensures no operations are attempted that do not comply with the DICOM standard.
 - **Changes the Optical Character Recognition (OCR) algorithm from _Tesseract_ to the much more modern Visual Document Understanding (VDU) model, [_Donut_](https://arxiv.org/abs/2111.15664).**
   - Will lead to a higher accuracy in detecting (and therefore removing) baked-in text within DICOM images.
   - Provides an understanding of the context for detected text, which _may_ allow the model to only remove _specific_ text that is sensitive.
+- **Provide a secure framework for tracing back the anonymized data to the original patient data at the source.**
+  - This traceability is _required_ in many Canadian jurisdictions.
+  - Process to access the original data should not be implemented in this application. Instead, a separate, standalone tool will be created for compartmentalization, where only authorized users—through the proper legal or clinical pathways—can re-identify anonymized data if necessary.
 
 [The original repository](https://github.com/TIO-IKIM/medical_image_deidentification) details (`README`) are available below.
 
