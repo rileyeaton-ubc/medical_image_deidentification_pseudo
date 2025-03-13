@@ -37,11 +37,10 @@ Namely, changing the codebase functionality in the following ways:
 - **Changes the Optical Character Recognition (OCR) algorithm from _Tesseract_ to the much more modern Visual Document Understanding (VDU) model, [_Donut_](https://arxiv.org/abs/2111.15664).**
   - Will lead to a higher accuracy in detecting (and therefore removing) baked-in text within DICOM images.
   - Provides an understanding of the context for detected text, which _may_ allow the model to only remove _specific_ text that is sensitive.
-- **Disable all features that do not involve files in DICOM format.**
-  - Allows the pipeline to better integrate into clinical environments, which solely use DICOM files in practice.
-  - Reduces overhead when dealing with thousands of files.
 
 [The original repository](https://github.com/TIO-IKIM/medical_image_deidentification) details (`README`) are available below.
+
+> Future fork of this fork will disable all features that do not involve files in DICOM format. This will allow the pipeline to better integrate into clinical environments—which solely use DICOM files in practice—and reduce overhead when dealing with thousands of files.
 
 ---
 
